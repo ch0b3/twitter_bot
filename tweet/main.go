@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/ChimeraCoder/anaconda"
 	"github.com/joho/godotenv"
@@ -16,7 +16,7 @@ import (
 
 const (
 	BASEURL = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
-	COUNT = "1000"
+	COUNT   = "1000"
 )
 
 func main() {
@@ -100,12 +100,12 @@ func buildClient() *http.Client {
 }
 
 type TalkResponse struct {
-	Status int `json:"status"`
-	Massage string `json:"message"`
+	Status  int      `json:"status"`
+	Massage string   `json:"message"`
 	Results []Result `json:"results"`
 }
 
 type Result struct {
 	Perplexity float64 `json:"perplexity"`
-	Reply string `json:"reply"`
+	Reply      string  `json:"reply"`
 }
