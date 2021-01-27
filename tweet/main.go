@@ -7,44 +7,40 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/ChimeraCoder/anaconda"
+	"github.com/joho/godotenv"
 )
 
 const (
 	BASEURL = "https://api.a3rt.recruit-tech.co.jp/talk/v1/smalltalk"
-	COUNT = "1000"
+	COUNT   = "1000"
 )
 
 func main() {
+	// local用
+	godotenv.Load(".env")
+
 	api := connectTwitterAPi()
 	tweets := getTweetFromTimeLine(api, COUNT)
 
 	for _, tweet := range tweets {
 		if strings.HasSuffix(tweet.FullText, "？") {
-			requestTalkAPI(tweet)
+			talkResponse := requestTalkAPI(tweet)
+			postTweet(talkResponse, tweet, api)
 			os.Exit(0)
 		}
 	}
 }
 
 func connectTwitterAPi() *anaconda.TwitterApi {
-	raw, err := ioutil.ReadFile("./twitterAccount.json")
-	checkError(err)
-
-	var twitterAccount TwitterAccount
-
-	// 構造体にセット
-	json.Unmarshal(raw, &twitterAccount)
-
-	// 認証
 	return anaconda.NewTwitterApiWithCredentials(
-		twitterAccount.AccessToken,
-		twitterAccount.AccessTokenSecret,
-		twitterAccount.ConsumerKey,
-		twitterAccount.ConsumerSecret)
+		os.Getenv("ACCESS_TOKEN"),
+		os.Getenv("ACCESS_TOKEN_SECRET"),
+		os.Getenv("CONSUMER_KEY"),
+		os.Getenv("CONSUMER_SECRET"))
 }
 
 func getTweetFromTimeLine(api *anaconda.TwitterApi, count string) []anaconda.Tweet {
@@ -104,21 +100,20 @@ func buildClient() *http.Client {
 	return client
 }
 
-// TwitterAccount はTwitterの認証用の情報
-type TwitterAccount struct {
-	AccessToken       string `json:"accessToken"`
-	AccessTokenSecret string `json:"accessTokenSecret"`
-	ConsumerKey       string `json:"consumerKey"`
-	ConsumerSecret    string `json:"consumerSecret"`
+func postTweet(talkResponse TalkResponse, tweet anaconda.Tweet, api *anaconda.TwitterApi) {
+	for _, result := range talkResponse.Results {
+		status := fmt.Sprintf("Q. %s\nA. %s", tweet.FullText, result.Reply)
+		api.PostTweet(status, nil)
+	}
 }
 
 type TalkResponse struct {
-	Status int `json:"status"`
-	Massage string `json:"message"`
+	Status  int      `json:"status"`
+	Massage string   `json:"message"`
 	Results []Result `json:"results"`
 }
 
 type Result struct {
 	Perplexity float64 `json:"perplexity"`
-	Reply string `json:"reply"`
+	Reply      string  `json:"reply"`
 }
