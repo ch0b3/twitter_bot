@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/ChimeraCoder/anaconda"
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -19,6 +20,9 @@ const (
 )
 
 func main() {
+	// local用
+	godotenv.Load(".env")
+
 	api := connectTwitterAPi()
 	tweets := getTweetFromTimeLine(api, COUNT)
 
@@ -31,20 +35,11 @@ func main() {
 }
 
 func connectTwitterAPi() *anaconda.TwitterApi {
-	raw, err := ioutil.ReadFile("./twitterAccount.json")
-	checkError(err)
-
-	var twitterAccount TwitterAccount
-
-	// 構造体にセット
-	json.Unmarshal(raw, &twitterAccount)
-
-	// 認証
 	return anaconda.NewTwitterApiWithCredentials(
-		twitterAccount.AccessToken,
-		twitterAccount.AccessTokenSecret,
-		twitterAccount.ConsumerKey,
-		twitterAccount.ConsumerSecret)
+		os.Getenv("ACCESS_TOKEN"),
+		os.Getenv("ACCESS_TOKEN_SECRET"),
+		os.Getenv("CONSUMER_KEY"),
+		os.Getenv("CONSUMER_SECRET"))
 }
 
 func getTweetFromTimeLine(api *anaconda.TwitterApi, count string) []anaconda.Tweet {
@@ -102,14 +97,6 @@ func buildClient() *http.Client {
 	client := &http.Client{}
 	client.Timeout = time.Second * 15
 	return client
-}
-
-// TwitterAccount はTwitterの認証用の情報
-type TwitterAccount struct {
-	AccessToken       string `json:"accessToken"`
-	AccessTokenSecret string `json:"accessTokenSecret"`
-	ConsumerKey       string `json:"consumerKey"`
-	ConsumerSecret    string `json:"consumerSecret"`
 }
 
 type TalkResponse struct {

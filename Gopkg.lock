@@ -50,6 +50,14 @@
   revision = "bca2e7f09a178fd36b034107a00e2323bca6a82e"
 
 [[projects]]
+  digest = "1:7df5a9695a743c3e1626b28bb8741602c8c15527e1efaeaec48ab2ff9a23f74c"
+  name = "github.com/joho/godotenv"
+  packages = ["."]
+  pruneopts = ""
+  revision = "23d116af351c84513e1946b527c88823e476be13"
+  version = "v1.3.0"
+
+[[projects]]
   branch = "master"
   digest = "1:d2edc411d5aefd62c4e5167e9353bf4a0c61c6d8cf7f790bab77b4096b43f503"
   name = "golang.org/x/net"
@@ -60,6 +68,9 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/ChimeraCoder/anaconda"]
+  input-imports = [
+    "github.com/ChimeraCoder/anaconda",
+    "github.com/joho/godotenv",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
