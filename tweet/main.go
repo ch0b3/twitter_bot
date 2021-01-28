@@ -27,7 +27,7 @@ func main() {
 	tweets := getTweetFromTimeLine(api, COUNT)
 
 	for _, tweet := range tweets {
-		if strings.HasSuffix(tweet.FullText, "？") {
+		if HasSuffix(tweet) {
 			talkResponse := requestTalkAPI(tweet)
 			postTweet(talkResponse, tweet, api)
 			os.Exit(0)
@@ -79,6 +79,13 @@ func checkError(err error) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+func HasSuffix(tweet anaconda.Tweet) bool {
+	if strings.HasSuffix(tweet.FullText, "？") {
+		return true
+	}
+	return false
 }
 
 func buildRequest(tweet anaconda.Tweet) *http.Request {
