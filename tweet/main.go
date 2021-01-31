@@ -27,7 +27,7 @@ func main() {
 	tweets := getTweetFromTimeLine(api, COUNT)
 
 	for _, tweet := range tweets {
-		if strings.HasSuffix(tweet.FullText, "？") {
+		if HasSuffix(tweet) {
 			talkResponse := requestTalkAPI(tweet)
 			postTweet(talkResponse, tweet, api)
 			os.Exit(0)
@@ -53,6 +53,13 @@ func getTweetFromTimeLine(api *anaconda.TwitterApi, count string) []anaconda.Twe
 	return tweets
 }
 
+func HasSuffix(tweet anaconda.Tweet) bool {
+	if strings.HasSuffix(tweet.FullText, "？") {
+		return true
+	}
+	return false
+}
+
 func requestTalkAPI(tweet anaconda.Tweet) TalkResponse {
 	req := buildRequest(tweet)
 	client := buildClient()
@@ -72,6 +79,13 @@ func requestTalkAPI(tweet anaconda.Tweet) TalkResponse {
 	fmt.Println(talkResponse)
 
 	return talkResponse
+}
+
+func postTweet(talkResponse TalkResponse, tweet anaconda.Tweet, api *anaconda.TwitterApi) {
+	for _, result := range talkResponse.Results {
+		status := fmt.Sprintf("Q. %s\nA. %s", tweet.FullText, result.Reply)
+		api.PostTweet(status, nil)
+	}
 }
 
 func checkError(err error) {
@@ -98,13 +112,6 @@ func buildClient() *http.Client {
 	client := &http.Client{}
 	client.Timeout = time.Second * 15
 	return client
-}
-
-func postTweet(talkResponse TalkResponse, tweet anaconda.Tweet, api *anaconda.TwitterApi) {
-	for _, result := range talkResponse.Results {
-		status := fmt.Sprintf("Q. %s\nA. %s", tweet.FullText, result.Reply)
-		api.PostTweet(status, nil)
-	}
 }
 
 type TalkResponse struct {
